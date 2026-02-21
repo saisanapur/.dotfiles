@@ -36,3 +36,20 @@ alias jadd='just add-workspace-dependency'
 thelp() {
   echo 'Usage: tt|tl|tu|tb <workspace>, e.g. tu @vanta/api-external'
 }
+
+# Start ngrok (pass service name)
+ngs() {
+  ngrok start "$1"
+}
+
+# Start integration with local impersonation disabled
+stweb() {
+  NO_LOCAL_IMPERSONATION_ENABLED=true just start dev-start-web
+}
+
+stint() {
+  local service="${1:?service required (e.g. zoom, slack, teams)}"
+  shift
+  NO_LOCAL_IMPERSONATION_ENABLED=true NGROK_URL="https://${service}.tunnel.vantaroo.com" just dev-start-integration "$@"
+}
+
