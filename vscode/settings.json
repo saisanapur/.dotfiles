@@ -1,0 +1,21 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "search.exclude": {
+    "**/.turbo": true,
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true
+  },
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.cwd": "/workspaces/obsidian",
+  "git.enableSmartCommit": false,
+  "git.confirmSync": true,
+  "extensions.ignoreRecommendations": false
+}
