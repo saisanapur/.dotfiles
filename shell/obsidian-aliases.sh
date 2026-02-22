@@ -44,7 +44,7 @@ ngs() {
 
 # Start integration with local impersonation disabled
 stweb() {
-  NO_LOCAL_IMPERSONATION_ENABLED=true just start dev-start-web
+  NO_LOCAL_IMPERSONATION_ENABLED=true just dev-start-web
 }
 
 stint() {
