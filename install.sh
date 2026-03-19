@@ -24,4 +24,8 @@ fi
 mkdir -p "$HOME/.config/Code/User"
 ln -sf "$DOTFILES_DIR/vscode/settings.json" "$HOME/.config/Code/User/settings.json"
 
+mkdir -p "/workspaces/obsidian/.claude"
+ln -sf "$DOTFILES_DIR/claude/obsidian-settings.local.json" "/workspaces/obsidian/.claude/settings.local.json"
+echo "Linked Claude local settings to /workspaces/obsidian/.claude/settings.local.json"
+
 echo "Done. Restart your shell or run: source $RC_FILE"

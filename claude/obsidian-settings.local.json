@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash ~/dotfiles/install.sh)",
+      "Bash(git clone:*)",
+      "Bash(git merge:*)",
+      "Bash(rm -rf ~/.dotfiles)",
+      "Read(//home/vscode/dotfiles/**)"
+    ]
+  }
+}
