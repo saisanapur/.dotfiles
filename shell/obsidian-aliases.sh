@@ -1,5 +1,12 @@
 # Obsidian monorepo aliases
 
+# Ona injects user secrets (JIRA_API_TOKEN, AWS creds, API keys, etc.) into
+# /etc/profile.d/ona-secrets.sh at environment start. Login shells source it
+# automatically; non-login shells (e.g. Claude Code's Bash tool) do not.
+# Sourcing here makes the secrets available in every shell that sources this
+# aliases file (i.e. every shell once install.sh has linked it into .bashrc).
+[ -f /etc/profile.d/ona-secrets.sh ] && source /etc/profile.d/ona-secrets.sh
+
 alias obsidian='cd /workspaces/obsidian'
 alias dfd='cd $HOME/dotfiles'
 alias gs='git status -sb'
