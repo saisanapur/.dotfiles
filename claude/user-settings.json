@@ -1,0 +1,52 @@
+{
+  "effortLevel": "medium",
+  "extraKnownMarketplaces": {
+    "sai-personal": {
+      "source": {
+        "source": "directory",
+        "path": "/home/vscode/dotfiles/claude-plugins"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "sai-wip@sai-personal": true
+  },
+  "permissions": {
+    "additionalDirectories": [
+      "/home/vscode/dotfiles",
+      "/home/vscode/dotfiles/claude-plugins"
+    ],
+    "allow": [
+      "mcp__mongodb__count",
+
+      "Bash(just *)",
+      "Bash(turbo *)",
+      "Bash(npx eslint *)",
+      "Bash(npx oxfmt *)",
+      "Bash(prek *)",
+
+      "Bash(docker compose:*)",
+      "Bash(docker inspect *)",
+      "Bash(docker rm *)",
+      "Bash(docker network *)",
+
+      "Bash(git push *)",
+      "Bash(git worktree *)",
+      "Bash(git branch *)",
+      "Bash(git rebase *)",
+      "Bash(gh pr *)",
+
+      "Bash(netstat -tlnp)",
+      "Bash(sudo lsof *)",
+      "Bash(sudo ss *)",
+      "Bash(sudo netstat *)",
+      "Bash(sudo fuser *)",
+      "Bash(sudo iptables *)",
+
+      "Bash(git -C ~/dotfiles *)",
+      "Bash(bash ~/dotfiles/install.sh)",
+
+      "Read(//home/vscode/**)"
+    ]
+  }
+}
