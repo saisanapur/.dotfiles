@@ -1,5 +1,45 @@
 {
-  "effortLevel": "medium",
+  "permissions": {
+    "allow": [
+      "mcp__mongodb__count",
+      "Bash(just *)",
+      "Bash(turbo *)",
+      "Bash(npx eslint *)",
+      "Bash(npx oxfmt *)",
+      "Bash(prek *)",
+      "Bash(docker compose:*)",
+      "Bash(docker inspect *)",
+      "Bash(docker rm *)",
+      "Bash(docker network *)",
+      "Bash(git push *)",
+      "Bash(git worktree *)",
+      "Bash(git branch *)",
+      "Bash(git rebase *)",
+      "Bash(gh pr *)",
+      "Bash(netstat -tlnp)",
+      "Bash(sudo lsof *)",
+      "Bash(sudo ss *)",
+      "Bash(sudo netstat *)",
+      "Bash(sudo fuser *)",
+      "Bash(sudo iptables *)",
+      "Bash(git -C ~/dotfiles *)",
+      "Bash(git -C ~/dotfiles add *)",
+      "Bash(git -C ~/dotfiles commit *)",
+      "Bash(git -C ~/dotfiles push *)",
+      "Bash(git -C ~/dotfiles status)",
+      "Bash(git -C ~/dotfiles diff *)",
+      "Bash(git -C ~/dotfiles log *)",
+      "Bash(bash ~/dotfiles/install.sh)",
+      "Read(//home/vscode/**)"
+    ],
+    "additionalDirectories": [
+      "/home/vscode/dotfiles",
+      "/home/vscode/dotfiles/claude-plugins"
+    ]
+  },
+  "enabledPlugins": {
+    "sai-wip@sai-personal": true
+  },
   "extraKnownMarketplaces": {
     "sai-personal": {
       "source": {
@@ -8,45 +48,5 @@
       }
     }
   },
-  "enabledPlugins": {
-    "sai-wip@sai-personal": true
-  },
-  "permissions": {
-    "additionalDirectories": [
-      "/home/vscode/dotfiles",
-      "/home/vscode/dotfiles/claude-plugins"
-    ],
-    "allow": [
-      "mcp__mongodb__count",
-
-      "Bash(just *)",
-      "Bash(turbo *)",
-      "Bash(npx eslint *)",
-      "Bash(npx oxfmt *)",
-      "Bash(prek *)",
-
-      "Bash(docker compose:*)",
-      "Bash(docker inspect *)",
-      "Bash(docker rm *)",
-      "Bash(docker network *)",
-
-      "Bash(git push *)",
-      "Bash(git worktree *)",
-      "Bash(git branch *)",
-      "Bash(git rebase *)",
-      "Bash(gh pr *)",
-
-      "Bash(netstat -tlnp)",
-      "Bash(sudo lsof *)",
-      "Bash(sudo ss *)",
-      "Bash(sudo netstat *)",
-      "Bash(sudo fuser *)",
-      "Bash(sudo iptables *)",
-
-      "Bash(git -C ~/dotfiles *)",
-      "Bash(bash ~/dotfiles/install.sh)",
-
-      "Read(//home/vscode/**)"
-    ]
-  }
+  "effortLevel": "medium"
 }
