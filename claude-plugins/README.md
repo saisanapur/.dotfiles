@@ -27,7 +27,7 @@ In Claude Code, from any session:
 /plugin install sai-wip@sai-personal
 ```
 
-Verify it worked by asking Claude: `sai hello`. It should confirm the plugin is loaded and list current skills.
+Verify it worked with `ls ~/dotfiles/claude-plugins/plugins/sai-wip/skills/` — the skills listed there should be loadable in a new Claude Code session (check the Manage Plugins UI in the VSCode extension, or use `/plugin list` in the CLI).
 
 ## Iteration loop
 
