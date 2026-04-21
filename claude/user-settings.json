@@ -34,11 +34,7 @@
       "Bash(NODE_OPTIONS=\"--max-old-space-size=8192\" npx eslint --fix packages/client-access/src/pages/access/reviews/shared/account-access-recommendation/signals.tsx)",
       "Bash(NODE_OPTIONS=\"--max-old-space-size=8192\" npx eslint --fix apps/web/src/access-management/graphql/resolvers/type-resolvers/AccessReviewAccountSnapshot.ts)",
       "Bash(NODE_OPTIONS=\"--max-old-space-size=8192\" npx eslint --fix packages/server-common/src/schemas/accessReviewAccountSnapshot.ts)",
-      "Bash(NODE_OPTIONS=\"--max-old-space-size=8192\" npx eslint --fix packages/access-management/src/access-reviews/services/account-access-recommendations/rules/approved-access-request-rule.test.ts packages/access-management/src/access-reviews/services/account-access-recommendations/rules/denied-access-request-rule.test.ts packages/access-management/src/access-reviews/services/account-access-recommendations/rules/inactivity-rule.test.ts)",
-      "Bash(ENVIRONMENT=test VARIANT=v2_hierarchy ./scripts/ai-ci/src/access-management/account-access-recommendations/prompt-eval/run-prompt-eval.sh job-title-access-control-matrix-policy)",
-      "Bash(ENVIRONMENT=test VARIANT=v3_comprehensive ./scripts/ai-ci/src/access-management/account-access-recommendations/prompt-eval/run-prompt-eval.sh job-title-access-control-matrix-policy)",
-      "Bash(ENVIRONMENT=test VARIANT=v4_surgical ./scripts/ai-ci/src/access-management/account-access-recommendations/prompt-eval/run-prompt-eval.sh job-title-access-control-matrix-policy)",
-      "Bash(ENVIRONMENT=test VARIANT=v5_focused ./scripts/ai-ci/src/access-management/account-access-recommendations/prompt-eval/run-prompt-eval.sh job-title-access-control-matrix-policy)"
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=8192\" npx eslint --fix packages/access-management/src/access-reviews/services/account-access-recommendations/rules/approved-access-request-rule.test.ts packages/access-management/src/access-reviews/services/account-access-recommendations/rules/denied-access-request-rule.test.ts packages/access-management/src/access-reviews/services/account-access-recommendations/rules/inactivity-rule.test.ts)"
     ],
     "additionalDirectories": [
       "/home/vscode/dotfiles",
