@@ -71,6 +71,18 @@ Phrase these as **questions for the author**, not recommendations. Hand-wave res
 - Restating rule violations you already flagged as Must Fix.
 - Vague hand-waving ("this feels off") — every comment needs a concrete recommendation.
 
+## Output destination
+
+Always **save the full review to a local file in addition to showing it in chat**, so the user can refer to it after the session ends. Reviews live in a gitignored directory at the repo root so they never get committed accidentally.
+
+1. Resolve the target path: `<repo-root>/.ai-reviews/<branch-slug>-<YYYYMMDD-HHmm>.md` where `<branch-slug>` is the current branch with `/` replaced by `-`. If a PR number is known (from `gh pr view`), prefix with `pr<number>-` for easier lookup.
+2. Ensure `.ai-reviews/` exists and is gitignored:
+   - If `<repo-root>/.ai-reviews/` does not exist, create it.
+   - If `.ai-reviews/` (or a pattern matching it) is not in `<repo-root>/.gitignore`, append it. Do this quietly — don't commit it unless the user asks; just leave the `.gitignore` change as a working-tree edit so the user can decide.
+3. Write the full review (every section below, in the same structure) to that file. The chat response should summarize the verdict and risks, then link to the saved file path so the user knows where to find the full write-up.
+
+Never write review output under `.git/`, `node_modules/`, or any path that is not gitignored. If for any reason the `.gitignore` cannot be updated (e.g. permissions, read-only env), warn the user in the chat response and fall back to `/tmp/claude-reviews/<branch-slug>/<timestamp>.md`.
+
 ## Output
 
 ### 1. Verdict
