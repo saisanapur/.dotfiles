@@ -46,7 +46,7 @@ Seven phases. **Do not skip phases.** If the user insists on skipping one (e.g. 
 | 2 | Solution options (if ambiguous) | Design doc in `.ai-dev/` |
 | 3 | Pre-implementation consensus | Rollout + error handling + observability signed off |
 | 4 | Implementation discipline | Tests-first, strict TS, Clean Code, scope watch |
-| 5 | Pre-push verification | Change-scoped → package-scoped → team-scoped checks green |
+| 5 | Pre-push verification | Change-scoped → workspace-scoped → impacted-dependents checks green |
 | 6 | PR creation | Concise description, required AI Model phrasing, staging hygiene |
 | 7 | Review-response loop | **Never** reply to PR comments without human approval |
 
@@ -198,21 +198,42 @@ Run per-workspace for every workspace the diff touches:
 - `turbo typecheck -F <workspace> --output-logs=errors-only`
 - `turbo lint -F <workspace> --output-logs=errors-only` (on-demand per `AGENTS.md`, but this skill opts in)
 
-**Gate 5c — Team-scoped (access management + integrations-platform).**
+**Gate 5c — Impacted-dependents only.**
 
-Before push, run against the team's owned workspaces — regressions in these areas are the ones the user will be on the hook for. Default set to sweep (adjust per diff):
+Pre-push, extend the scope beyond the workspaces the diff directly edits *only* to the ones that are genuinely impacted — the downstream workspaces that import the changed code or depend on its types / fixtures. **Do not sweep all team-owned packages.** A blanket team sweep belongs on CI, not in every local pre-push loop.
+
+**How to compute "impacted":**
+
+1. Start from the set of directly-edited workspaces from Gate 5b.
+2. Walk outward along dependents — any workspace that imports from an edited workspace, depends on a type / schema / fixture that changed, or shares a migration path.
+3. Prefer turbo's built-in filtering when practical:
+   - `turbo typecheck --filter='...[origin/main]' --output-logs=errors-only` (typechecks everything affected by the diff)
+   - `turbo unit-test --filter='...[origin/main]' --output-logs=errors-only` (runs tests for everything affected)
+   - If the full `[origin/main]` scope is too broad for local, filter to `'...[origin/main]'` intersected with the team-owned priority list (below).
+4. For each impacted workspace found, run:
+
+   ```bash
+   turbo typecheck -F <workspace> --output-logs=errors-only
+   turbo unit-test -F <workspace> --output-logs=errors-only
+   ```
+
+**Team-ownership as a *priority filter*, not a default set.**
+
+The user's team owns these workspaces; when they appear in the impacted set, treat them as high priority and do not skip them. But **listing them here is not an instruction to run them blindly** — only run if genuinely impacted:
 
 - **Access management** (primary): `client-access`, `client-access-core`, `access-management`
 - **Integrations platform** (frequently coupled): `integrations-platform`, `integrations-platform-core`, `integrations-platform-models`, `integrations-platform-sdk`, `integrations-platform-ui`, `client-integrations-platform-ui`, `integrations`, `client-integration`, `client-integration-core`
 
-For each relevant workspace:
+If a workspace in the priority list is in the impacted set, do not prune it — run the check even if you'd otherwise be on the fence. If a workspace in the priority list is *not* in the impacted set, **do not run it** just because the team owns it — that's CI's job.
 
-```bash
-turbo typecheck -F <workspace> --output-logs=errors-only
-turbo unit-test -F <workspace> --output-logs=errors-only
-```
+**Scope discipline.**
+- Direct edits → covered in Gate 5b.
+- One hop away (direct importers of edited code) → include.
+- Two+ hops away where the change is an internal refactor with stable public types → skip, note the skip.
+- Generated types regenerated after an `.graphql` / schema change → include the workspaces consuming the regenerated types.
+- Shared fixtures / test utils changed → include any workspace that consumes them.
 
-**Scope pruning.** Don't mindlessly run the whole list — narrow to workspaces the diff plausibly affects (direct edits, imports, shared types, shared fixtures). If uncertain, err toward including the workspace rather than skipping. If a workspace is clearly unrelated (e.g. diff is frontend-only, workspace is backend-only), skip and note the skip.
+If uncertain whether something is impacted, err toward including it — but always name *why* it's impacted (e.g. "imports `FooType` which changed"). "Might be affected, not sure" is a sign to spend 30 seconds checking the import graph, not to sweep blindly.
 
 **Lint OOM handling.**
 
@@ -350,7 +371,9 @@ When this skill runs end-to-end, the user ends up with:
 - **Inlining the full design doc into the PR description.** Link it. Keep the PR readable.
 - **Re-implementing `commit-and-pr` rules here.** This skill augments — duplication means drift.
 - **Skipping Phase 5 and relying on CI.** CI is the last line of defense, not the first. Format / lint / type / test issues discoverable locally should be fixed locally.
-- **Running broad scopes before narrow ones.** If Gate 5a is red, running team-scoped checks is wasted signal. Fix narrow, then widen.
+- **Running broad scopes before narrow ones.** If Gate 5a is red, running impacted-dependents is wasted signal. Fix narrow, then widen.
+- **Sweeping all team-owned workspaces pre-push.** Gate 5c covers *impacted* packages, not the whole team surface. A blanket team sweep burns time locally and is what CI is for.
+- **Including a team-owned workspace "just in case" when it isn't impacted.** Team ownership is a priority filter for workspaces already in the impacted set, not an instruction to run them unconditionally.
 - **Retrying lint OOM indefinitely.** Five retries with elevated heap, then CI. No loops.
 - **Responding to review comments without explicit approval.** The marginal cost of a human-review pass is small; a presumptuous reply damages trust.
 - **Treating a "CI fix" as trivial when it isn't.** A 20-file change in response to a failing check is a feature, not a fix — route it back through the full loop.
@@ -366,7 +389,7 @@ For changes genuinely small enough that phases 2 + 3c are overkill (one-package 
 1. Confirm spec in one sentence.
 2. Tests first, strict TS.
 3. Rollout + error-handling consensus in a single short paragraph.
-4. **Still run Phase 5a + 5b** (change + workspace scoped). Team-scoped (5c) is optional in quick-mode unless the diff touches access-management or integrations-platform surface area.
+4. **Still run Phase 5a + 5b** (change + workspace scoped). Gate 5c (impacted dependents) is optional in quick-mode unless a team-owned workspace is in the impacted set, in which case run it for those workspaces.
 5. Hand to `commit-and-pr` with the overridden Changes + AI Model style.
 6. **Staging hygiene still applies** — stage by name, no local settings / editor metadata / agent config smuggled in.
 7. **Phase 7 is never skipped.** Even in quick-mode, no reply is posted without human approval.

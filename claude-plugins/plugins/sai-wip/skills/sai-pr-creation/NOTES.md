@@ -23,7 +23,10 @@ _Paste the transcript and note what went wrong. Candidates:_
 - _Inlined a design doc into the PR description instead of linking it_
 - _Didn't save spec/design to `./.ai-dev/`_
 - _Skipped Phase 5 (pre-push verification) and pushed straight to CI_
-- _Ran team-scoped checks before change-scoped — inverted the cost curve_
+- _Ran impacted-dependents checks before change-scoped — inverted the cost curve_
+- _Swept all team-owned workspaces instead of computing the impacted set — slow, blocks local loop, duplicates CI_
+- _Ran a team-owned workspace that wasn't actually impacted "just to be safe" — wasted time_
+- _Used `turbo ... --filter='...[origin/main]'` without intersecting with the team priority list on very broad changes — local ran for too long_
 - _Retried lint OOM more than 5 times / didn't persist the elevated heap setting_
 - _**Posted a reply to a PR comment without explicit human approval**_
 - _Marked a review conversation as resolved / re-requested review / promoted to ready autonomously_
