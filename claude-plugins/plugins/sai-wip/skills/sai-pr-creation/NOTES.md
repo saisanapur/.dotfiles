@@ -28,6 +28,10 @@ _Paste the transcript and note what went wrong. Candidates:_
 - _**Posted a reply to a PR comment without explicit human approval**_
 - _Marked a review conversation as resolved / re-requested review / promoted to ready autonomously_
 - _Treated a multi-file CI fix as trivial instead of routing through the full loop_
+- _Staged `.gitignore` / `.claude/settings*.json` / `.vscode/` / `CLAUDE.md` / `.ai-dev/` alongside a business change_
+- _Used `git add -A` / `git add .` instead of staging by name_
+- _Let the PR grow past 300 non-test lines / 6 dense functions without proposing a stack_
+- _Proposed a stack split for a PR that was mostly rename / codemod churn (should have stayed as one)_
 
 ## Output-format drift
 
@@ -64,3 +68,8 @@ _Does the user actually write BDD-style, TDD-style, or something else in practic
 - Lint OOM retry budget is 5 — is that right? Too low = premature CI delegation, too high = wasted time. Tune after observing real sessions.
 - Phase 7 blocks all outgoing comments. Should there be a narrow exception (e.g. "acknowledging receipt" / "PTAL"-style pings) that doesn't need per-reply approval, or does the full gate stay?
 - CI-fix escalation threshold — currently "non-trivial = new logic, schema / type shifts, multi-file refactor." Is that the right line? Watch for cases where a "simple" fix silently grew.
+- Scope-watch thresholds (~300 non-test lines, >6 logically dense functions) — tune after observing real sessions. Too strict = constant noise; too loose = review-fatigue PRs slip through.
+- "Logically dense function" is subjective. Should there be a more objective proxy (cyclomatic complexity, AST node count)? Probably overkill — judgment is fine — but note if the model keeps mis-classifying.
+- Default-exclude list for staging — keep an eye on real sessions. If the model keeps trying to stage a path not on the list, add it.
+- Staging rule interaction with the user's dotfiles repo — this skill assumes `~/dotfiles` exists. If a user lands on this skill without that setup, the "commit settings separately" advice needs a fallback.
+- Is the stacking-mechanics advice too prescriptive (`-01-foundation` / `-02-impl` / `-03-wiring`)? Compare against whatever branch shapes the user naturally produces.

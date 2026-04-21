@@ -45,9 +45,9 @@ Seven phases. **Do not skip phases.** If the user insists on skipping one (e.g. 
 | 1 | Spec (TDD / BDD) | Human-confirmed spec |
 | 2 | Solution options (if ambiguous) | Design doc in `.ai-dev/` |
 | 3 | Pre-implementation consensus | Rollout + error handling + observability signed off |
-| 4 | Implementation discipline | Tests-first, strict TS, Clean Code |
+| 4 | Implementation discipline | Tests-first, strict TS, Clean Code, scope watch |
 | 5 | Pre-push verification | Change-scoped → package-scoped → team-scoped checks green |
-| 6 | PR creation | Concise description, required AI Model phrasing |
+| 6 | PR creation | Concise description, required AI Model phrasing, staging hygiene |
 | 7 | Review-response loop | **Never** reply to PR comments without human approval |
 
 ### Phase 1: Spec first (TDD / BDD)
@@ -150,6 +150,31 @@ Code phase. Non-negotiables:
 - If the fix would materially grow scope or blast radius: **stop, surface it, and offer to draft a follow-up ticket** via [`sai-jira-draft`](../sai-jira-draft/SKILL.md). Do not silently expand the PR.
 - Explicitly list every in-scope refactor in the PR description's Changes section so the reviewer isn't surprised.
 
+**Scope watch — prefer stacking over a sprawling PR.**
+
+Reviewers trade attention for size. Past a certain threshold, a single PR gets a worse review than the same change split into a stack. While implementing, keep an eye on the diff size. Flag a stacking recommendation to the human when *either* signal fires:
+
+- **~300+ lines of non-test code changed** (exclude test files, generated code, lockfiles, fixtures, snapshots).
+- **More than 6 logically dense functions** — new or materially rewritten. "Logically dense" means non-trivial branching / orchestration / domain logic; boilerplate getters, thin delegations, and mechanical helpers don't count.
+
+When either threshold is crossed, **pause and propose a stack**. Don't keep piling onto the same branch. Surface the proposed split:
+
+1. Identify the natural seams: typically **foundation layer first** (types / schema / interface), **implementation layer second** (the core logic), **wiring / UI / rollout third** (callsites, GraphQL glue, frontend integration, feature-flag plumbing).
+2. Propose 2-4 stacked PRs in order, each independently reviewable and shippable. Each should tell a coherent story on its own.
+3. Ask the human to approve the split before proceeding. If they say "keep it one PR", note the assumption and continue — but call out the size risk in the PR description's Expectations for Reviews section so the reviewer knows what they're in for.
+
+**Stacking mechanics.** Once the split is approved:
+- Each child branch targets the previous one (not `main`). Use `$BRANCH_PREFIX/<slug>-01-foundation`, `-02-impl`, `-03-wiring` naming.
+- Rebase the stack when the base changes. Keep per-branch diffs clean.
+- In each PR's description, link forward and backward: "Stack: (1 of 3) · next: <link>" so reviewers know where they are.
+
+**Don't stack when:**
+- The change is genuinely atomic (e.g. a single refactor that's meaningless halfway).
+- The diff is dominated by mechanical churn (renames, generated code, codemod output) — high line count but low review cost.
+- The human explicitly asked for a single PR.
+
+The thresholds are **soft signals, not hard rules** — use judgment. A 350-line PR of boilerplate rename is fine as one; a 200-line PR of dense orchestration logic may still be worth splitting. Lean on the "logically dense functions" heuristic when line count is misleading.
+
 ### Phase 5: Pre-push verification — scoped, ordered, bounded
 
 Never rely on CI to catch format / lint / type / test failures that can be caught locally. Run checks in this exact order, smallest scope first, and **stop / fix at each failing gate before continuing** — don't fan out broadly while a narrow check is red.
@@ -234,6 +259,32 @@ Then, on new lines, add any additional context the template asks for (key prompt
 
 **Everything else** (Motivation, Testing, Deployment, Expectations for Reviews) — follow `commit-and-pr` verbatim. Do not duplicate its guidance here.
 
+**Staging hygiene — keep local / editor metadata out of business PRs.**
+
+Business and spec-driven PRs should contain **only the code changes the spec implies**. Local settings, editor metadata, agent configuration, and personal tooling state must not be checked in alongside business changes unless the spec's reason genuinely warrants it.
+
+**Default-exclude list** (do not stage unless the PR's spec explicitly calls for touching them):
+
+- `.gitignore` (unless the spec is about ignoring new generated artifacts the change introduces)
+- `.claude/settings.json`, `.claude/settings.local.json`, `.claude/commands/`, `.claude/agents/`, `.claude/plugins/`
+- `.cursor/`, `.cursor-settings.json`, `.vscode/settings.json`, `.idea/`
+- `.env`, `.env.local`, `.env.*.local`, anything resembling secrets
+- `CLAUDE.md` / `AGENTS.md` (repo-wide; personal notes belong in the user's dotfiles repo, not here)
+- `.ai-dev/`, `.ai-reviews/`, and any other agent-workspace directories
+- Lockfile changes the business change didn't cause (e.g. `yarn.lock` drift from unrelated local installs)
+- Dependency additions that weren't required by the spec
+- Formatter / linter config changes (`.eslintrc*`, `.prettierrc*`, `oxfmt` config) unless the spec is specifically about them
+
+**Process.** Before `git add`:
+
+1. Run `git status` and `git diff` over the full working tree.
+2. For each modified / new file, ask: *"does the PR spec actually require this change?"* If the answer is "no" or "it's just my local tooling," **exclude it**.
+3. Stage files by explicit name. **Never** use `git add -A` or `git add .` in this skill's flow — those are the default path to smuggling local state into business PRs.
+4. For anything borderline, surface it to the human: *"The diff includes X which the spec didn't mention — stage or leave out?"*
+5. If a legitimately needed change happens to touch one of the default-exclude paths (e.g. the spec is *about* `.gitignore`), stage it and **call it out explicitly in the Motivation section** so the reviewer isn't surprised.
+
+**When these changes do need to ship.** Personal settings, agent configs, and dotfiles belong in the user's dotfiles repo (`~/dotfiles`), not in business PRs. If you notice something useful accumulated (e.g. new allowlist entries in `.claude/settings.local.json`, a new `.ai-rules/*` guidance file) during the session, offer to commit it to the dotfiles repo **separately** — don't attach it to the business PR as a hitchhiker.
+
 ### Phase 7: Review-response loop — human approval required
 
 After PR creation, reviewers will leave comments. **Never post a reply to a PR comment without explicit human review and approval of the reply text.** This applies to:
@@ -278,8 +329,11 @@ When this skill runs end-to-end, the user ends up with:
    - An **AI Model Used** section using the required phrasing.
    - A Testing section that factually states what was added / run.
    - A rollout plan honoring the flag / safety decision from Phase 3a.
+   - **Only business-relevant files staged** — no hitchhiking dotfiles / editor metadata / agent config.
+   - Split into a **stack of 2-4 PRs** if the diff crossed the scope thresholds (or an explicit note explaining why one PR is appropriate).
 6. Drafted (but **not yet posted**) replies for any reviewer comments, awaiting human approval per Phase 7.
 7. (Optional) A drafted JIRA follow-up via `sai-jira-draft` for any refactor deferred from Phase 4.
+8. (Optional) A **separate commit to the user's dotfiles repo** for any settings / agent-config / skill iteration that accumulated during the session and belongs there rather than in the business PR.
 
 ## Anti-patterns for this skill
 
@@ -300,6 +354,10 @@ When this skill runs end-to-end, the user ends up with:
 - **Retrying lint OOM indefinitely.** Five retries with elevated heap, then CI. No loops.
 - **Responding to review comments without explicit approval.** The marginal cost of a human-review pass is small; a presumptuous reply damages trust.
 - **Treating a "CI fix" as trivial when it isn't.** A 20-file change in response to a failing check is a feature, not a fix — route it back through the full loop.
+- **Using `git add -A` / `git add .`.** Smuggles local settings, editor metadata, and agent config into business PRs. Always stage by name in this skill's flow.
+- **Checking in `.gitignore` / `.claude/settings*.json` / `.vscode/` / `CLAUDE.md` / `.ai-dev/` / `.ai-reviews/` alongside a business change** unless the spec genuinely demands it. Those belong in the user's dotfiles repo and should be committed there separately.
+- **Piling past 300 non-test lines or 6 dense functions without proposing a stack.** Reviewer attention is finite; a sprawling single PR gets a worse review than a coherent stack.
+- **Stacking boilerplate.** If the diff is mostly rename / codemod / generated churn, don't split for splitting's sake — surface the line count but explain why one PR is fine.
 
 ## Quick-mode (for small changes)
 
@@ -310,6 +368,7 @@ For changes genuinely small enough that phases 2 + 3c are overkill (one-package 
 3. Rollout + error-handling consensus in a single short paragraph.
 4. **Still run Phase 5a + 5b** (change + workspace scoped). Team-scoped (5c) is optional in quick-mode unless the diff touches access-management or integrations-platform surface area.
 5. Hand to `commit-and-pr` with the overridden Changes + AI Model style.
-6. **Phase 7 is never skipped.** Even in quick-mode, no reply is posted without human approval.
+6. **Staging hygiene still applies** — stage by name, no local settings / editor metadata / agent config smuggled in.
+7. **Phase 7 is never skipped.** Even in quick-mode, no reply is posted without human approval.
 
 Use quick-mode only when the user explicitly signals small scope or when the diff demonstrably is. The default is the full loop.
