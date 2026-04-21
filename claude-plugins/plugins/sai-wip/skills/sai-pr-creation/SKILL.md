@@ -1,0 +1,315 @@
+---
+name: sai-pr-creation
+description: Use when the user is starting a non-trivial feature, bug fix, or refactor that will ship as a PR — "implement X", "build Y", "ship a feature for Z", "create a PR for this", "let's work on [ticket]", "full flow for [change]". Also use when a CI fix escalates into a non-trivial change (new logic, schema / type shifts, multi-file refactor) — not just a one-line tweak. Opinionated end-to-end loop that augments (does NOT replace) the workspace's `commit-and-pr` skill and the `superpowers:finishing-a-development-branch` / `superpowers:requesting-code-review` skills. Enforces spec-first (TDD/BDD), tests-before-implementation, consensus on error handling + rollout safety + observability *before* writing code, strict TS discipline, Clean Code / Clean Architecture, a scoped pre-push verification sequence (change → package → team), and a human-approved reply loop for PR feedback. Defers to `sai-solution-options` for ambiguous problems, `sai-senior-review` for architectural bar, `sai-launch-observability` for telemetry planning, `sai-jira-draft` for follow-ups.
+---
+
+# sai-pr-creation
+
+Opinionated ship-a-feature loop. The workspace's [`commit-and-pr`](../../../../../workspaces/obsidian/.agents/skills/commit-and-pr/SKILL.md) covers *mechanics* (rebase, draft-only, template sections, security labels) and [`superpowers:finishing-a-development-branch`](~/.claude/plugins/cache/claude-plugins-official/superpowers) covers *what-next-options*. This skill layers **discipline gates** around them: spec before code, tests before implementation, consensus on error handling / rollout / observability before merge, and a description style that respects the reader.
+
+Do **not** restate what `commit-and-pr` already covers. Invoke it — don't inline it.
+
+## When to trigger
+
+- "Implement X" / "build X" / "ship X" / "work on [ticket]"
+- "Start a new feature" / "kick off [change]"
+- "Create a PR for this" / "let's ship this" / "full flow for Y"
+- Any time the user is about to start writing non-trivial code that will end in a PR
+
+## Do not trigger for
+
+- Reading / exploring / answering questions → stay out of the way
+- Trivial one-line config or typo fixes → hand straight to `commit-and-pr`
+- **Simple** CI fixes (format, lint, obvious test flake, one-line type tweak) → `pr-diagnostics` directly
+- Reviewing someone else's PR → `sai-senior-review` / workspace `/review`
+
+**But do trigger when a CI fix grows.** If `pr-diagnostics` surfaces a root cause that requires non-trivial change — new logic, schema / type shifts, multi-file refactor, test redesign, behavioral change — **stop and invoke this skill.** The same spec / consensus / verification gates apply: a "CI fix" that edits 20 files is a feature in disguise and should be treated as one.
+
+## Defer to these first
+
+Before the first keystroke of code, internalize these — this skill's rules sit *on top* of them and must not contradict them:
+
+1. **[`commit-and-pr`](../../../../../workspaces/obsidian/.agents/skills/commit-and-pr/SKILL.md)** — branch workflow, draft-only, template sections, security labels.
+2. **Repo rules** — `AGENTS.md` / `CLAUDE.md`: no `any`, no `as` (except `as const`), no `!`, never call `tsc` directly, lint + format before diff.
+3. **[`sai-senior-review`](../sai-senior-review/SKILL.md)** — the architectural / reliability / observability bar the eventual review will hold this PR to. Build toward it from the start.
+4. **`superpowers:finishing-a-development-branch`** and **`superpowers:requesting-code-review`** — end-of-branch structured options and pre-merge subagent review.
+
+If any rule here conflicts with one of those, those win. Escalate the conflict to the user rather than silently overriding.
+
+## The loop
+
+Seven phases. **Do not skip phases.** If the user insists on skipping one (e.g. "just start coding"), note the assumption and proceed — don't argue, but make the skipped phase visible at PR time.
+
+| # | Phase | Gate |
+|---|---|---|
+| 1 | Spec (TDD / BDD) | Human-confirmed spec |
+| 2 | Solution options (if ambiguous) | Design doc in `.ai-dev/` |
+| 3 | Pre-implementation consensus | Rollout + error handling + observability signed off |
+| 4 | Implementation discipline | Tests-first, strict TS, Clean Code |
+| 5 | Pre-push verification | Change-scoped → package-scoped → team-scoped checks green |
+| 6 | PR creation | Concise description, required AI Model phrasing |
+| 7 | Review-response loop | **Never** reply to PR comments without human approval |
+
+### Phase 1: Spec first (TDD / BDD)
+
+Before any implementation, **ask the human to write (or confirm) a concise spec**. One or two short paragraphs is enough. The spec must answer:
+
+- **What's the business or engineering motivation?** One sentence. Not "JIRA-123" — the actual *why*.
+- **Who's affected?** Which users, roles, domains, systems.
+- **What does success look like?** In observable terms (a user can do X / a metric moves / an error disappears).
+- **What's explicitly out of scope?**
+
+Format, in the human's own words — pick whichever fits:
+
+- **BDD style:** `Given <context>, when <action>, then <observable outcome>.`
+- **TDD style:** A bulleted list of the test cases that must pass before this is done.
+
+**If the user says "you write it":** draft one based on what you know, then explicitly ask: *"Does this match your intent? Reply with corrections or 'looks good' — I won't start coding until confirmed."* Do not proceed on silence.
+
+Save the spec to `./.ai-dev/<short-slug>-spec.md` so it survives the session and is visible to future-you / reviewers.
+
+### Phase 2: If ambiguous, step into solution analysis
+
+If the spec reveals material ambiguity — multiple plausible approaches, non-trivial trade-offs, cross-package impact, schema / migration shape unclear — **do not start coding**. Hand off to [`sai-solution-options`](../sai-solution-options/SKILL.md) and save its output to `./.ai-dev/<short-slug>-design.md`.
+
+Signals you need the design pass:
+- More than one reasonable approach exists and they differ on rollout risk, performance, or reversibility
+- Touches data model, auth, tenant boundaries, or background jobs
+- Requires a migration, a new service, or cross-team coordination
+- User said "how should we approach this?" rather than "implement this"
+
+The design doc lives at `./.ai-dev/<short-slug>-design.md` and is referenced from the PR description's Motivation section (but **not copy-pasted** into it — link it instead so the PR stays concise).
+
+### Phase 3: Pre-implementation consensus gates
+
+Before writing code, reach explicit consensus with the human on three things. **Ask — don't assume.** Batch as one short numbered message; don't interrogate.
+
+**3a. Rollout safety.** Ask which is appropriate:
+- Feature flag (which one, new or existing)? Cohort / % / domain-scoped?
+- Backwards-compatible schema change + backfill?
+- Kill switch / fast-disable path?
+- None needed — stated reason
+
+Write the answer into the spec doc so it doesn't get lost.
+
+**3b. Error handling & corner cases.** Enumerate explicitly, then grill:
+- Empty input, null, concurrent writes, failed upstream calls, retries
+- Inactive user, deactivated domain, mid-tier permissions, role transitions
+- Partial data, truncation, ordering, tie-breakers, pagination boundaries
+- Timeouts, rate limits, idempotency on writes
+
+For each: **what's the intended behavior, and how will we know it's working?** Hand-wave answers ("edge case, probably fine") are not acceptable — promote to a ticket or handle now. Achieve explicit consensus before coding.
+
+**3c. Observability & success metrics.** Suggest and discuss. Do not punt to "we'll add logging later." For the kind of change at hand, propose:
+- **Success metrics** — which signal tells us this worked? (product analytics event, metric delta, error-rate floor)
+- **Error discovery** — which log / alert / metric fires if this breaks silently?
+- **System KPIs** — latency / throughput / queue depth / error rate on the hot path. What threshold would page?
+- **Product analytics** — which events establish adoption / funnel / success?
+
+For non-trivial rollouts, hand off to [`sai-launch-observability`](../sai-launch-observability/SKILL.md) and link its output. Otherwise inline a 3-5 line plan in the spec doc.
+
+### Phase 4: Implementation discipline
+
+Code phase. Non-negotiables:
+
+**Tests first.**
+- Write the failing test that expresses the spec. Red, then green, then refactor.
+- Writing tests first forces clean interfaces: if the test is awkward, the API is wrong.
+- Exceptions (rare): genuinely exploratory code where the shape is unknown. Mark clearly and circle back to tests before PR.
+
+**Test quality.**
+- Test **business logic and key edge cases**, not implementation details.
+- A good test survives a refactor that preserves behavior. A test that breaks when internal wiring changes is leaking implementation.
+- No over-mocking. Mocks drift from prod; prefer real collaborators + seams.
+- One assertion focus per test. Readable names that describe behavior, not method calls.
+
+**TypeScript discipline.**
+- Never give up type safety. No `any`. No `as` except `as const`. No `!`. No silent `as unknown as Foo`.
+- Use `satisfies`, discriminated unions, `never` for impossible states, Zod at untyped boundaries.
+- Prefer inference — annotate only where it adds information (boundaries, complex expressions, narrower-than-inferred constraints).
+- Treat optional properties as `exactOptionalPropertyTypes` — omit the key rather than assign `undefined`.
+- If type safety genuinely can't be preserved, **stop and ask** — don't widen silently. The user must explicitly authorize the loosening, and it must be commented with *why*.
+
+**Clean Code / Clean Architecture idioms.**
+- Small functions with single responsibility, early returns for guard clauses.
+- Separate pure logic from I/O. Injectable dependencies. No I/O at module init.
+- Layer boundaries: API/GraphQL ↔ service/domain ↔ data access. Keep them clean.
+- Dependencies point inward (domain doesn't know about transport).
+- Prefer clarity over cleverness. Prefer deletion over abstraction.
+- Modern TS idioms: discriminated unions over boolean flags, tagged results over throwing for expected failures, Remeda (not lodash) for utilities.
+
+**Comments.**
+- Default: write none. Readable code with good naming beats comments.
+- Exception: one short line when the *why* is non-obvious — a hidden constraint, a subtle invariant, a workaround for a specific bug, behavior that would surprise a reader.
+- Reserve paragraph-form comments for **public API docs** and even there, describe *contract*, not *implementation*. Never leak internal structure into a docstring.
+- Never narrate the diff. Never reference the current task, ticket, or caller ("used by X", "added for Y flow") — that rots.
+
+**Proactive refactoring within scope.**
+- While implementing, notice problems in the code path you're touching: dead code, dangerous patterns, redundant logic, unsafe TS, missing tests.
+- If the fix is small and keeps the PR focused: do it.
+- If the fix would materially grow scope or blast radius: **stop, surface it, and offer to draft a follow-up ticket** via [`sai-jira-draft`](../sai-jira-draft/SKILL.md). Do not silently expand the PR.
+- Explicitly list every in-scope refactor in the PR description's Changes section so the reviewer isn't surprised.
+
+### Phase 5: Pre-push verification — scoped, ordered, bounded
+
+Never rely on CI to catch format / lint / type / test failures that can be caught locally. Run checks in this exact order, smallest scope first, and **stop / fix at each failing gate before continuing** — don't fan out broadly while a narrow check is red.
+
+**Gate 5a — Change-scoped (fastest, always run first).**
+
+Over just the changed files:
+
+1. `npx oxfmt --write <changed files>` — format
+2. `npx eslint --fix <changed files>` — lint
+3. `just unit-test <relative path>` for each changed test file — tests
+4. `turbo typecheck -F <workspace of changed file> --output-logs=errors-only` — typecheck at the tightest workspace that contains the edit
+
+This should be fast (seconds to a minute). Fix issues here before touching broader scope.
+
+**Gate 5b — Package / workspace-scoped.**
+
+Run per-workspace for every workspace the diff touches:
+
+- `turbo unit-test -F <workspace> --output-logs=errors-only`
+- `turbo typecheck -F <workspace> --output-logs=errors-only`
+- `turbo lint -F <workspace> --output-logs=errors-only` (on-demand per `AGENTS.md`, but this skill opts in)
+
+**Gate 5c — Team-scoped (access management + integrations-platform).**
+
+Before push, run against the team's owned workspaces — regressions in these areas are the ones the user will be on the hook for. Default set to sweep (adjust per diff):
+
+- **Access management** (primary): `client-access`, `client-access-core`, `access-management`
+- **Integrations platform** (frequently coupled): `integrations-platform`, `integrations-platform-core`, `integrations-platform-models`, `integrations-platform-sdk`, `integrations-platform-ui`, `client-integrations-platform-ui`, `integrations`, `client-integration`, `client-integration-core`
+
+For each relevant workspace:
+
+```bash
+turbo typecheck -F <workspace> --output-logs=errors-only
+turbo unit-test -F <workspace> --output-logs=errors-only
+```
+
+**Scope pruning.** Don't mindlessly run the whole list — narrow to workspaces the diff plausibly affects (direct edits, imports, shared types, shared fixtures). If uncertain, err toward including the workspace rather than skipping. If a workspace is clearly unrelated (e.g. diff is frontend-only, workspace is backend-only), skip and note the skip.
+
+**Lint OOM handling.**
+
+If `turbo lint` / `npx eslint` fails with an OOM (JavaScript heap out of memory), allow up to **5 retries total** across the session with an elevated heap:
+
+```bash
+NODE_OPTIONS="--max-old-space-size=8192" npx eslint --fix <files>
+# or
+NODE_OPTIONS="--max-old-space-size=8192" turbo lint -F <workspace> --output-logs=errors-only
+```
+
+**Persist the setting** for the rest of the session — don't retry from scratch each time. Export it once in the shell or set it via the `.claude/settings.local.json` env block if the user wants it permanent.
+
+If lint OOMs **more than 5 times** despite the elevated heap, **stop retrying and delegate to CI.** Record in the PR description's Testing section: "Lint skipped locally due to repeated OOM; relying on CI." Do not loop.
+
+This applies to lint specifically — type check / tests OOMing is a different signal (usually an actual bug or a too-broad scope) and deserves investigation, not a retry budget.
+
+**Failure routing.**
+- Format / lint / type failure at Gate 5a → fix, re-run 5a, then continue.
+- Test failure at Gate 5a or 5b → either the test is wrong (fix it) or the code is wrong (back to Phase 4). Don't push red.
+- Type / test failure at Gate 5c → treat as high signal: you've regressed the team's owned surface. Resolve or narrow scope before push.
+- Persistent lint OOM (>5) after the retry budget → delegate to CI with a note in Testing.
+
+**Only after all applicable gates pass, proceed to Phase 6.**
+
+### Phase 6: PR creation — augmented description style
+
+Let [`commit-and-pr`](../../../../../workspaces/obsidian/.agents/skills/commit-and-pr/SKILL.md) handle the mechanics (draft flag, template sections, security label, rebase). **Override only the writing style of two sections:**
+
+**Changes section — stricter style.**
+- One or two sentences. High-level only.
+- **Do not leak implementation details.** No file lists, no function names, no class hierarchies, no code snippets. The diff has those.
+- High-level design is OK **only when non-obvious**: a one-liner like "Uses a background job so the request path stays synchronous" earns its place. "Added a function that does X" does not.
+- If a design doc exists at `./.ai-dev/<slug>-design.md`, reference it — don't inline it.
+
+**AI Model Used — mandatory format.**
+Always output exactly this shape (substitute the actual model):
+
+```
+Designed and implemented with [model name] through human discussions.
+```
+
+Then, on new lines, add any additional context the template asks for (key prompts, unusual usage). Keep it under four lines total. The "through human discussions" phrasing is **required** — it signals this wasn't a one-shot generation and that the human is accountable for the design.
+
+**Everything else** (Motivation, Testing, Deployment, Expectations for Reviews) — follow `commit-and-pr` verbatim. Do not duplicate its guidance here.
+
+### Phase 7: Review-response loop — human approval required
+
+After PR creation, reviewers will leave comments. **Never post a reply to a PR comment without explicit human review and approval of the reply text.** This applies to:
+
+- Inline code comments
+- Top-level review comments
+- "Changes requested" review bodies
+- Automated review bodies (Codex, bots) when the user is considering how to respond
+- Re-review pings ("PTAL", "bumping this")
+
+**The flow, every time:**
+
+1. Fetch the feedback (via `pr-diagnostics` or `gh api`).
+2. **Draft a proposed response in chat**, grouped by comment, each clearly labeled with the comment author + file:line.
+3. Classify each proposed response: `Agree + fix`, `Agree + follow-up`, `Disagree + reasoning`, `Need clarification`, or `Ack only`.
+4. For any `Disagree` or `Need clarification`: check with the human *first* whether the reasoning holds up before drafting public-facing text. The human may have context you don't.
+5. For `Agree + fix`: make the code change, but **don't post "done" comments** until the fix is pushed and the human has approved the reply text.
+6. **Wait for the human's explicit go-ahead** (`"post it"`, `"send"`, `"approved"`, or similar) before any `gh pr comment` / `gh api ... /comments` / reply-in-thread invocation. Silence is not approval.
+7. If the human edits the drafted text, post *their* version, not yours.
+
+**Never do any of the following autonomously:**
+- Mark a review conversation as resolved
+- Re-request review
+- Promote the PR from draft to ready
+- Post a reply, even a one-line "done" or "thanks"
+- Edit the PR description in response to feedback (stage the diff for human review instead)
+
+**Why this matters:** reviewer threads are part of the permanent record. A misaligned or presumptuous reply damages trust and creates rework. The marginal cost of one human review pass before posting is small; the cost of a bad reply is not.
+
+**Scope note.** This rule is *specifically* about replying to comments. *Making* the requested code change still follows the normal loop (back to Phase 4 / 5 as needed). Only the **outgoing communication** is gated on human approval.
+
+## Output contract
+
+When this skill runs end-to-end, the user ends up with:
+
+1. `./.ai-dev/<slug>-spec.md` — spec, rollout plan, error-handling consensus, observability plan.
+2. (Optional) `./.ai-dev/<slug>-design.md` — if Phase 2 was needed.
+3. Code written tests-first, strict TS, Clean Code / Clean Architecture.
+4. A recorded pass through the Phase 5 verification gates (and a note in Testing if any were delegated to CI, e.g. persistent lint OOM).
+5. A draft PR created via `commit-and-pr` mechanics, with:
+   - A **concise, design-forward Changes section** that doesn't leak implementation.
+   - An **AI Model Used** section using the required phrasing.
+   - A Testing section that factually states what was added / run.
+   - A rollout plan honoring the flag / safety decision from Phase 3a.
+6. Drafted (but **not yet posted**) replies for any reviewer comments, awaiting human approval per Phase 7.
+7. (Optional) A drafted JIRA follow-up via `sai-jira-draft` for any refactor deferred from Phase 4.
+
+## Anti-patterns for this skill
+
+- **Starting to code before the spec is confirmed.** The whole point is to catch misalignment before implementation cost.
+- **Silently generating a spec and pretending the human wrote it.** If you drafted it, say so and wait for confirmation.
+- **Skipping Phase 3 because "it feels obvious".** Error handling, rollout, and observability always feel obvious until prod — force the conversation anyway.
+- **Punting observability to "follow-up".** Success metrics and error-discovery signals ship *with* the feature or the feature isn't ready.
+- **Tests after the fact.** Tests written after the implementation mostly validate that the code does what it does — not that it does what the spec requires. Order matters.
+- **Widening types to make errors go away.** If the type system is complaining, it usually knows something. Ask before loosening.
+- **Over-commenting.** Every redundant comment is a future lie. Default to none.
+- **Leaking implementation into the description.** Reviewers read diffs. Tell them what they can't see.
+- **Silently expanding PR scope while "refactoring along the way".** Surface the refactor or defer it — don't smuggle.
+- **Omitting "through human discussions" from the AI Model line.** It's the signal of human accountability; its absence reads as a raw AI dump.
+- **Inlining the full design doc into the PR description.** Link it. Keep the PR readable.
+- **Re-implementing `commit-and-pr` rules here.** This skill augments — duplication means drift.
+- **Skipping Phase 5 and relying on CI.** CI is the last line of defense, not the first. Format / lint / type / test issues discoverable locally should be fixed locally.
+- **Running broad scopes before narrow ones.** If Gate 5a is red, running team-scoped checks is wasted signal. Fix narrow, then widen.
+- **Retrying lint OOM indefinitely.** Five retries with elevated heap, then CI. No loops.
+- **Responding to review comments without explicit approval.** The marginal cost of a human-review pass is small; a presumptuous reply damages trust.
+- **Treating a "CI fix" as trivial when it isn't.** A 20-file change in response to a failing check is a feature, not a fix — route it back through the full loop.
+
+## Quick-mode (for small changes)
+
+For changes genuinely small enough that phases 2 + 3c are overkill (one-package tweak, contained bug fix, < ~50 lines), collapse to:
+
+1. Confirm spec in one sentence.
+2. Tests first, strict TS.
+3. Rollout + error-handling consensus in a single short paragraph.
+4. **Still run Phase 5a + 5b** (change + workspace scoped). Team-scoped (5c) is optional in quick-mode unless the diff touches access-management or integrations-platform surface area.
+5. Hand to `commit-and-pr` with the overridden Changes + AI Model style.
+6. **Phase 7 is never skipped.** Even in quick-mode, no reply is posted without human approval.
+
+Use quick-mode only when the user explicitly signals small scope or when the diff demonstrably is. The default is the full loop.
