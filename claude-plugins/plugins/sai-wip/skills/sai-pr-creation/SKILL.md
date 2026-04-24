@@ -130,12 +130,30 @@ Code phase. Non-negotiables:
 - Treat optional properties as `exactOptionalPropertyTypes` — omit the key rather than assign `undefined`.
 - If type safety genuinely can't be preserved, **stop and ask** — don't widen silently. The user must explicitly authorize the loosening, and it must be commented with *why*.
 
-**Clean Code / Clean Architecture idioms.**
-- Small functions with single responsibility, early returns for guard clauses.
-- Separate pure logic from I/O. Injectable dependencies. No I/O at module init.
+**Code hygiene — readability, modularity, Clean Code / SOLID.**
+
+*Readability.*
+- Name things so a reader can skim the file and follow the story. Prefer a named function over a commented block; prefer a named constant over a magic literal; prefer a small helper over a clever one-liner.
+- Early returns for guard clauses. Happy path at the lowest indentation level.
+- One level of abstraction per function. Don't mix "orchestrate the workflow" with "parse a specific byte" in the same body.
+- Prefer clarity over cleverness. If the reviewer has to pause and reason, rewrite.
+
+*Modularity.*
+- Split by concern, not by file size. Each module has one clear reason to exist and a narrow public surface.
+- If a file starts accruing unrelated exports, split it. If a function signature needs five parameters with booleans controlling branches, split it.
+- Co-locate implementation, tests, and fixtures: `feature.ts`, `feature.test.ts`, `feature.testutil.ts`.
 - Layer boundaries: API/GraphQL ↔ service/domain ↔ data access. Keep them clean.
-- Dependencies point inward (domain doesn't know about transport).
-- Prefer clarity over cleverness. Prefer deletion over abstraction.
+
+*SOLID, applied pragmatically.*
+- **SRP** — one reason to change per function / module. If you can describe it with "and," it's two responsibilities.
+- **OCP** — extend via composition or discriminated-union cases, not by editing every caller of a central switch. New behavior shouldn't require reopening unrelated code.
+- **LSP** — alternative implementations honor the same contract. Don't narrow inputs or broaden outputs silently; don't throw where the base returns.
+- **ISP** — consumers depend on the narrowest interface they actually use. Don't force a caller to import a kitchen-sink type just to reach one field.
+- **DIP** — depend on abstractions at layer boundaries; inject concrete collaborators. Domain code doesn't import transport. Pure logic doesn't reach into I/O.
+
+*Other Clean Architecture idioms.*
+- Separate pure logic from I/O. Injectable dependencies. No I/O at module init.
+- Prefer deletion over abstraction. Three similar lines is fine; a premature abstraction is not.
 - Modern TS idioms: discriminated unions over boolean flags, tagged results over throwing for expected failures, Remeda (not lodash) for utilities.
 
 **Comments.**
@@ -365,6 +383,7 @@ When this skill runs end-to-end, the user ends up with:
 - **Tests after the fact.** Tests written after the implementation mostly validate that the code does what it does — not that it does what the spec requires. Order matters.
 - **Widening types to make errors go away.** If the type system is complaining, it usually knows something. Ask before loosening.
 - **Over-commenting.** Every redundant comment is a future lie. Default to none.
+- **Ignoring code hygiene.** Dense unreadable blocks, grab-bag modules, functions with five responsibilities, domain code reaching into transport — all ship as tech debt the reviewer has to flag. Apply readability / modularity / SOLID as you write, not as a post-hoc cleanup pass.
 - **Leaking implementation into the description.** Reviewers read diffs. Tell them what they can't see.
 - **Silently expanding PR scope while "refactoring along the way".** Surface the refactor or defer it — don't smuggle.
 - **Omitting "through human discussions" from the AI Model line.** It's the signal of human accountability; its absence reads as a raw AI dump.
