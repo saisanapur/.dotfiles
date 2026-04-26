@@ -3,3 +3,4 @@ Thumbs.db
 *.swp
 **/.claude/settings.local.json
 **/.ai-dev
+.last-autosync

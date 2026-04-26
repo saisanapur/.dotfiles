@@ -1,0 +1,11 @@
+# Global gitignore — applied to every repo via `git config --global core.excludesfile`.
+# Symlinked to ~/.gitignore_global by install.sh.
+
+# Local AI scratch / plan / design space (per ~/.claude/CLAUDE.md convention).
+# We never want these tracked in product repos like obsidian.
+.ai-dev/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp

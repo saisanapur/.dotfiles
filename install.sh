@@ -44,6 +44,11 @@ link_with_backup() {
   echo "Linked $link_path -> $target"
 }
 
+# ---- Global gitignore (applies to every repo, including obsidian) ----
+link_with_backup "$DOTFILES_DIR/git/gitignore_global" "$HOME/.gitignore_global"
+git config --global core.excludesfile "$HOME/.gitignore_global"
+echo "Set git config --global core.excludesfile -> $HOME/.gitignore_global"
+
 # ---- VSCode user settings ----
 link_with_backup "$DOTFILES_DIR/vscode/settings.json" "$HOME/.config/Code/User/settings.json"
 

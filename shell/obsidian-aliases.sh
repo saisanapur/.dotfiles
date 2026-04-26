@@ -7,6 +7,33 @@
 # aliases file (i.e. every shell once install.sh has linked it into .bashrc).
 [ -f /etc/profile.d/ona-secrets.sh ] && source /etc/profile.d/ona-secrets.sh
 
+# Auto-pull dotfiles + re-run install.sh on shell startup, rate-limited to once
+# per 24h so opening many terminals isn't slow. Runs in background, silent on
+# failure, only on the main branch with a clean tree (so in-progress edits are
+# never disturbed). Skip with DOTFILES_NO_AUTOSYNC=1.
+_dotfiles_autosync() {
+  local dir="$HOME/dotfiles"
+  local stamp="$dir/.last-autosync"
+  [ -d "$dir/.git" ] || return 0
+  [ "${DOTFILES_NO_AUTOSYNC:-}" = "1" ] && return 0
+  # Once per 24h.
+  if [ -f "$stamp" ] && [ "$(find "$stamp" -mtime -1 2>/dev/null)" ]; then
+    return 0
+  fi
+  (
+    cd "$dir" || exit 0
+    # Only auto-pull on main with a clean tree — never disturb WIP edits.
+    [ "$(git symbolic-ref --short HEAD 2>/dev/null)" = "main" ] || exit 0
+    [ -z "$(git status --porcelain 2>/dev/null)" ] || exit 0
+    if git pull --ff-only --quiet 2>/dev/null; then
+      bash "$dir/install.sh" >/dev/null 2>&1 || true
+      touch "$stamp"
+    fi
+  ) &
+  disown 2>/dev/null || true
+}
+_dotfiles_autosync
+
 alias obsidian='cd /workspaces/obsidian'
 alias dfd='cd $HOME/dotfiles'
 alias gs='git status -sb'
