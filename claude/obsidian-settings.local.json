@@ -5,7 +5,13 @@
       "Bash(git clone:*)",
       "Bash(git merge:*)",
       "Bash(rm -rf ~/.dotfiles)",
-      "Read(//home/vscode/dotfiles/**)"
+      "Read(//home/vscode/dotfiles/**)",
+      "Bash(bash *)",
+      "Bash(git -C /home/vscode/dotfiles add .gitignore install.sh claude/CLAUDE.md claude/user-settings.json claude/obsidian-settings.local.json)",
+      "Bash(git -C /home/vscode/dotfiles status --short)"
     ]
+  },
+  "enabledPlugins": {
+    "gsync-plugin@gsync-local": true
   }
 }

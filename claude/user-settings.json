@@ -1,5 +1,94 @@
 {
+  "effortLevel": "medium",
+  "enabledPlugins": {
+    "sai-wip@sai-personal": true,
+    "superpowers@superpowers-marketplace": true
+  },
+  "extraKnownMarketplaces": {
+    "gsync-local": {
+      "source": {
+        "path": "/workspaces/obsidian/scripts/gsync/claude-plugin",
+        "source": "directory"
+      }
+    },
+    "sai-personal": {
+      "source": {
+        "path": "/home/vscode/dotfiles/claude-plugins",
+        "source": "directory"
+      }
+    },
+    "superpowers-marketplace": {
+      "source": {
+        "repo": "obra/superpowers-marketplace",
+        "source": "github"
+      }
+    }
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "command": "python3 /home/vscode/.dev/hooks/providers/claude/finish.py",
+            "timeout": 10,
+            "type": "command"
+          }
+        ],
+        "matcher": "idle_prompt"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "async": true,
+            "command": "python3 /home/vscode/.dev/hooks/providers/claude/heartbeat.py",
+            "timeout": 10,
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "python3 /home/vscode/.dev/hooks/providers/claude/finish.py",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "command": "python3 /home/vscode/.dev/hooks/providers/claude/finish.py",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "python3 /home/vscode/.dev/hooks/providers/claude/start.py",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
+    "additionalDirectories": [
+      "/home/vscode/dotfiles",
+      "/home/vscode/dotfiles/claude-plugins"
+    ],
     "allow": [
       "mcp__mongodb__count",
       "Bash(just *)",
@@ -35,22 +124,7 @@
       "Bash(NODE_OPTIONS=\"--max-old-space-size=8192\" npx eslint --fix apps/web/src/access-management/graphql/resolvers/type-resolvers/AccessReviewAccountSnapshot.ts)",
       "Bash(NODE_OPTIONS=\"--max-old-space-size=8192\" npx eslint --fix packages/server-common/src/schemas/accessReviewAccountSnapshot.ts)",
       "Bash(NODE_OPTIONS=\"--max-old-space-size=8192\" npx eslint --fix packages/access-management/src/access-reviews/services/account-access-recommendations/rules/approved-access-request-rule.test.ts packages/access-management/src/access-reviews/services/account-access-recommendations/rules/denied-access-request-rule.test.ts packages/access-management/src/access-reviews/services/account-access-recommendations/rules/inactivity-rule.test.ts)"
-    ],
-    "additionalDirectories": [
-      "/home/vscode/dotfiles",
-      "/home/vscode/dotfiles/claude-plugins"
     ]
   },
-  "enabledPlugins": {
-    "sai-wip@sai-personal": true
-  },
-  "extraKnownMarketplaces": {
-    "sai-personal": {
-      "source": {
-        "source": "directory",
-        "path": "/home/vscode/dotfiles/claude-plugins"
-      }
-    }
-  },
-  "effortLevel": "medium"
+  "theme": "dark"
 }

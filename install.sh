@@ -50,6 +50,9 @@ link_with_backup "$DOTFILES_DIR/vscode/settings.json" "$HOME/.config/Code/User/s
 # ---- Claude: user-scope settings (global across all workspaces) ----
 link_with_backup "$DOTFILES_DIR/claude/user-settings.json" "$HOME/.claude/settings.json"
 
+# ---- Claude: user-scope CLAUDE.md (global instructions across all workspaces) ----
+link_with_backup "$DOTFILES_DIR/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+
 # ---- Claude: project-scope local settings for the Obsidian workspace ----
 if [ -d "/workspaces/obsidian" ]; then
   link_with_backup "$DOTFILES_DIR/claude/obsidian-settings.local.json" "/workspaces/obsidian/.claude/settings.local.json"
