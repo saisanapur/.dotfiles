@@ -34,6 +34,38 @@ _dotfiles_autosync() {
 }
 _dotfiles_autosync
 
+# Daily gsync of every .ai-dev/**/*.md under the obsidian repo to Google Drive.
+# Same once-per-24h rate-limit + silent-failure + background pattern as the
+# dotfiles autosync. gsync OAuth is required (run `npx gsync auth login` once);
+# until that's set up uploads silently fail. Skip with GSYNC_NO_AUTOSYNC=1.
+# Force a run via `gsync-now` (clears the stamp).
+_gsync_autosync() {
+  local stamp="$HOME/dotfiles/.last-gsync"
+  [ "${GSYNC_NO_AUTOSYNC:-}" = "1" ] && return 0
+  [ -d "/workspaces/obsidian" ] || return 0
+  if [ -f "$stamp" ] && [ "$(find "$stamp" -mtime -1 2>/dev/null)" ]; then
+    return 0
+  fi
+  (
+    cd /workspaces/obsidian || exit 0
+    find . -type f -name "*.md" -path "*/.ai-dev/*" \
+      -not -path "*/node_modules/*" -not -path "*/.git/*" 2>/dev/null \
+      | while IFS= read -r f; do
+          npx --no-install gsync upload "$f" >/dev/null 2>&1 || true
+        done
+    touch "$stamp"
+  ) &
+  disown 2>/dev/null || true
+}
+_gsync_autosync
+
+# Force-run gsync now (clears the 24h stamp first).
+gsync-now() {
+  rm -f "$HOME/dotfiles/.last-gsync"
+  _gsync_autosync
+  echo "gsync auto-sync triggered in background. Tail nothing — failures are silent; check with: npx gsync view <file>"
+}
+
 alias obsidian='cd /workspaces/obsidian'
 alias dfd='cd $HOME/dotfiles'
 alias gs='git status -sb'
