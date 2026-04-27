@@ -85,7 +85,6 @@
     ]
   },
   "permissions": {
-    "defaultMode": "acceptEdits",
     "additionalDirectories": [
       "/home/vscode/dotfiles",
       "/home/vscode/dotfiles/claude-plugins"
@@ -274,7 +273,8 @@
       "Edit(/**/Dockerfile*)",
       "Edit(/**/.env*)",
       "Write(/**/.env*)"
-    ]
+    ],
+    "defaultMode": "bypassPermissions"
   },
   "theme": "dark"
 }

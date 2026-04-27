@@ -63,5 +63,8 @@ if [ -d "/workspaces/obsidian" ]; then
   link_with_backup "$DOTFILES_DIR/claude/obsidian-settings.local.json" "/workspaces/obsidian/.claude/settings.local.json"
 fi
 
+# ---- Codex CLI: user-scope config (approval_policy, sandbox_mode, hooks toggle) ----
+link_with_backup "$DOTFILES_DIR/codex/config.toml" "$HOME/.codex/config.toml"
+
 echo
 echo "Done. Restart your shell or run: source $RC_FILE"
