@@ -23,3 +23,6 @@ Free-form tags are allowed when none of the defaults fit. After 4 weeks of entri
 
 ## Entries
 
+- 2026-04-26 #harness #prompting — No mechanism to aggregate comments from my PR reviews to identify areas of learnings and improvements.
+- 2026-04-26 #prompting #harness — Claude tried WebFetch + subagent before gsync when fetching a private Google Doc; should route to gsync first when the env has it.
+- 2026-04-26 #harness #prompting — First-pass designs over-architect; self-applying the minimalist + BCR lens needs to happen before the user has to invoke a critic.
