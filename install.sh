@@ -66,12 +66,18 @@ fi
 # ---- Codex CLI: user-scope config (approval_policy, sandbox_mode, hooks toggle) ----
 link_with_backup "$DOTFILES_DIR/codex/config.toml" "$HOME/.codex/config.toml"
 
-# ---- Access Management KB: clone next to obsidian for skills + contributions ----
-# The AM KB hosts shared team skills (run-test-plan, new-kb, sprint-prep, etc.)
-# under .claude/skills/. The run-test-plan skill in particular hardcodes the
-# sibling-of-obsidian path. Cloning here makes every Ona instance pick it up;
-# user-settings.json registers the directory via additionalDirectories so all
-# Claude sessions auto-discover the skills.
+# ---- Access Management KB: clone + per-skill symlinks ----
+# AM KB hosts shared team skills (run-test-plan, new-kb, sprint-prep, etc.) at
+# .claude/skills/. The run-test-plan skill in particular hardcodes the
+# sibling-of-obsidian path for its scripts/agents, so cloning at this exact
+# location is required.
+#
+# Skill *discovery* is separate from cloning: Claude Code only auto-discovers
+# skills under installed plugins, <project>/.claude/skills/, or
+# ~/.claude/skills/. Symlinking each AM KB skill into ~/.claude/skills/ surfaces
+# them in every session (including outside obsidian) without forking the AM KB
+# upstream. The skill SKILL.md files re-resolve to their AM KB sibling for
+# scripts/agents, so the symlinks stay thin pointers.
 AM_KB_DIR="/workspaces/access-mgmt-knowledge-base"
 if [ -d /workspaces ] && [ ! -d "$AM_KB_DIR" ]; then
   if gh repo clone VantaInc/access-mgmt-knowledge-base "$AM_KB_DIR" >/dev/null 2>&1; then
@@ -79,6 +85,23 @@ if [ -d /workspaces ] && [ ! -d "$AM_KB_DIR" ]; then
   else
     echo "Skipped AM KB clone (gh auth may be missing or no /workspaces dir)"
   fi
+fi
+
+if [ -d "$AM_KB_DIR/.claude/skills" ]; then
+  mkdir -p "$HOME/.claude/skills"
+  for skill_path in "$AM_KB_DIR"/.claude/skills/*/; do
+    [ -d "$skill_path" ] || continue
+    skill_name="$(basename "$skill_path")"
+    link_path="$HOME/.claude/skills/$skill_name"
+    if [ -L "$link_path" ] && [ "$(readlink "$link_path")" = "${skill_path%/}" ]; then
+      continue
+    fi
+    if [ -e "$link_path" ] || [ -L "$link_path" ]; then
+      mv "$link_path" "${link_path}.pre-am-kb-$(date +%Y%m%d-%H%M%S)"
+    fi
+    ln -s "${skill_path%/}" "$link_path"
+    echo "Linked AM KB skill: $link_path -> ${skill_path%/}"
+  done
 fi
 
 echo
