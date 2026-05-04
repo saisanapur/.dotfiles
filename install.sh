@@ -66,5 +66,20 @@ fi
 # ---- Codex CLI: user-scope config (approval_policy, sandbox_mode, hooks toggle) ----
 link_with_backup "$DOTFILES_DIR/codex/config.toml" "$HOME/.codex/config.toml"
 
+# ---- Access Management KB: clone next to obsidian for skills + contributions ----
+# The AM KB hosts shared team skills (run-test-plan, new-kb, sprint-prep, etc.)
+# under .claude/skills/. The run-test-plan skill in particular hardcodes the
+# sibling-of-obsidian path. Cloning here makes every Ona instance pick it up;
+# user-settings.json registers the directory via additionalDirectories so all
+# Claude sessions auto-discover the skills.
+AM_KB_DIR="/workspaces/access-mgmt-knowledge-base"
+if [ -d /workspaces ] && [ ! -d "$AM_KB_DIR" ]; then
+  if gh repo clone VantaInc/access-mgmt-knowledge-base "$AM_KB_DIR" >/dev/null 2>&1; then
+    echo "Cloned access-mgmt-knowledge-base -> $AM_KB_DIR"
+  else
+    echo "Skipped AM KB clone (gh auth may be missing or no /workspaces dir)"
+  fi
+fi
+
 echo
 echo "Done. Restart your shell or run: source $RC_FILE"

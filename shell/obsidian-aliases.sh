@@ -68,6 +68,20 @@ gsync-now() {
 
 alias obsidian='cd /workspaces/obsidian'
 alias dfd='cd $HOME/dotfiles'
+alias amkb='cd /workspaces/access-mgmt-knowledge-base'
+
+# Pull AM KB main with a clean tree. Safe to run anywhere — fails silently if
+# the repo isn't cloned (install.sh handles the initial clone) or has WIP edits.
+am-kb-pull() {
+  local dir="/workspaces/access-mgmt-knowledge-base"
+  [ -d "$dir/.git" ] || { echo "AM KB not cloned at $dir; run install.sh"; return 1; }
+  ( cd "$dir" \
+    && [ "$(git symbolic-ref --short HEAD 2>/dev/null)" = "main" ] \
+    && [ -z "$(git status --porcelain 2>/dev/null)" ] \
+    && git pull --ff-only --quiet \
+    && echo "AM KB synced to $(git rev-parse --short HEAD)" \
+  ) || echo "AM KB not synced — not on main or working tree dirty"
+}
 alias gs='git status -sb'
 alias gl='git log --oneline --decorate --graph -20'
 alias gd='git diff'

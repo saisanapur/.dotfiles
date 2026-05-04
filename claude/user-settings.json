@@ -87,7 +87,8 @@
   "permissions": {
     "additionalDirectories": [
       "/home/vscode/dotfiles",
-      "/home/vscode/dotfiles/claude-plugins"
+      "/home/vscode/dotfiles/claude-plugins",
+      "/workspaces/access-mgmt-knowledge-base"
     ],
     "allow": [
       "Read(//**)",
