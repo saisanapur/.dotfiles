@@ -197,6 +197,8 @@ The thresholds are **soft signals, not hard rules** — use judgment. A 350-line
 
 Never rely on CI to catch format / lint / type / test failures that can be caught locally. Run checks in this exact order, smallest scope first, and **stop / fix at each failing gate before continuing** — don't fan out broadly while a narrow check is red.
 
+**These gates apply to every push that adds new commits to a remote PR**, not only the initial PR creation. Small follow-up commits — a one-liner, a copy tweak, addressing a single reviewer nit — go through the same Gate 5a sequence (format → lint → tests → typecheck). The fastest way to ship a stale-format PR is to skip this on a follow-up commit because it "feels too small to need it."
+
 **Gate 5a — Change-scoped (fastest, always run first).**
 
 Over just the changed files:
