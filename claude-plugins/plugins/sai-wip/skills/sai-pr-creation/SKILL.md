@@ -298,6 +298,12 @@ Then, on new lines, add any additional context the template asks for (key prompt
 
 **Everything else** (Motivation, Testing, Deployment, Expectations for Reviews) — follow `commit-and-pr` verbatim. Do not duplicate its guidance here.
 
+**Pre-push description re-verification — every push, not just the first.**
+
+`commit-and-pr` covers description-update triggers tied to specific events (reviewer feedback, scope change, conflicts). That misses a quieter failure mode: a small follow-up commit can stale a "Changes" or "Testing" section without anyone noticing. Override:
+
+Before **every** `git push` that adds new commits to a remote PR — not just the initial creation — re-read the live description and confirm every claim still matches the diff. If anything is now wrong, missing, or padded (e.g. a Testing section that lists test counts that just changed, a Changes bullet that claimed "no new files" but you just added one), update via `gh pr edit --body-file` **before** the push completes. This is cheap to do and prevents reviewers from re-grounding on a stale description mid-review.
+
 **Staging hygiene — keep local / editor metadata out of business PRs.**
 
 Business and spec-driven PRs should contain **only the code changes the spec implies**. Local settings, editor metadata, agent configuration, and personal tooling state must not be checked in alongside business changes unless the spec's reason genuinely warrants it.
