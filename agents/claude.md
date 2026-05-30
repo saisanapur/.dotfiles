@@ -3,10 +3,10 @@
 ## Preferred Workflow
 
 1. Read `.ai-rules/codebase-foundations.md` before coding changes.
-2. Run `just post-pull` if environment looks stale.
+2. Run `just post-pull` and `turbo generate-types --output-logs=errors-only`if environment looks stale.
 3. Use scoped turbo tasks with `--output-logs=errors-only`.
 4. Format/lint changed files before summarizing.
-5. Run relevant unit tests.
+5. Run relevant unit tests
 
 ## Useful Commands
 
