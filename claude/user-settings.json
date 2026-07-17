@@ -1,94 +1,5 @@
 {
-  "effortLevel": "medium",
-  "enabledPlugins": {
-    "sai-wip@sai-personal": true,
-    "superpowers@superpowers-marketplace": true
-  },
-  "extraKnownMarketplaces": {
-    "gsync-local": {
-      "source": {
-        "path": "/workspaces/obsidian/scripts/gsync/claude-plugin",
-        "source": "directory"
-      }
-    },
-    "sai-personal": {
-      "source": {
-        "path": "/home/vscode/dotfiles/claude-plugins",
-        "source": "directory"
-      }
-    },
-    "superpowers-marketplace": {
-      "source": {
-        "repo": "obra/superpowers-marketplace",
-        "source": "github"
-      }
-    }
-  },
-  "hooks": {
-    "Notification": [
-      {
-        "hooks": [
-          {
-            "command": "python3 /home/vscode/.dev/hooks/providers/claude/finish.py",
-            "timeout": 10,
-            "type": "command"
-          }
-        ],
-        "matcher": "idle_prompt"
-      }
-    ],
-    "PostToolUse": [
-      {
-        "hooks": [
-          {
-            "async": true,
-            "command": "python3 /home/vscode/.dev/hooks/providers/claude/heartbeat.py",
-            "timeout": 10,
-            "type": "command"
-          }
-        ],
-        "matcher": "Bash"
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "command": "python3 /home/vscode/.dev/hooks/providers/claude/finish.py",
-            "timeout": 10,
-            "type": "command"
-          }
-        ]
-      }
-    ],
-    "TaskCompleted": [
-      {
-        "hooks": [
-          {
-            "command": "python3 /home/vscode/.dev/hooks/providers/claude/finish.py",
-            "timeout": 10,
-            "type": "command"
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "command": "python3 /home/vscode/.dev/hooks/providers/claude/start.py",
-            "timeout": 10,
-            "type": "command"
-          }
-        ]
-      }
-    ]
-  },
   "permissions": {
-    "additionalDirectories": [
-      "/home/vscode/dotfiles",
-      "/home/vscode/dotfiles/claude-plugins"
-    ],
     "allow": [
       "Read(//**)",
       "Edit(/workspaces/**)",
@@ -274,7 +185,100 @@
       "Edit(/**/.env*)",
       "Write(/**/.env*)"
     ],
-    "defaultMode": "bypassPermissions"
+    "defaultMode": "bypassPermissions",
+    "additionalDirectories": [
+      "/home/vscode/dotfiles",
+      "/home/vscode/dotfiles/claude-plugins"
+    ]
   },
-  "theme": "dark"
+  "model": "sonnet",
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /home/vscode/.dev/hooks/providers/claude/finish.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /home/vscode/.dev/hooks/providers/claude/heartbeat.py",
+            "timeout": 10,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /home/vscode/.dev/hooks/providers/claude/finish.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /home/vscode/.dev/hooks/providers/claude/finish.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /home/vscode/.dev/hooks/providers/claude/start.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "sai-wip@sai-personal": true,
+    "superpowers@superpowers-marketplace": true
+  },
+  "extraKnownMarketplaces": {
+    "gsync-local": {
+      "source": {
+        "source": "directory",
+        "path": "/workspaces/obsidian/scripts/gsync/claude-plugin"
+      }
+    },
+    "sai-personal": {
+      "source": {
+        "source": "directory",
+        "path": "/home/vscode/dotfiles/claude-plugins"
+      }
+    },
+    "superpowers-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "obra/superpowers-marketplace"
+      }
+    }
+  },
+  "effortLevel": "medium",
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "dark",
+  "tui": "fullscreen",
+  "cleanupPeriodDays": 14
 }
