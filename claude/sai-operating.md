@@ -29,8 +29,9 @@ If a proposal scores low on all three, push back before implementing.
 Bitten by these; don't repeat:
 
 - **No `as` casts** (except `as const`), no `any`, no `!`. Fix at the root, not at the call site.
+- **No AI-context comments in any artifact (code included).** Never narrate the change, restate what code does, justify by cross-referencing other code, reference a task/ticket, or comment on removed/omitted code. Reserve comments solely for highly complex trade-offs or non-obvious design choices; default to none. (See auto-memory `feedback-no-ai-context-comments`.)
 - **Spec must precede code.** Phase 1 of `sai-pr-creation` is non-negotiable for non-trivial work.
-- **Never reply to PR comments without explicit human approval.** Phase 7 of `sai-pr-creation` applies to every reply, including "thanks" and "done".
+- **Never reply to PR comments from human reviewers without explicit human approval.** Phase 7 of `sai-pr-creation` applies to every such reply, including "thanks" and "done". *Carve-out:* after fixing an **automated-review-bot** comment (e.g. `ai-tooling-app`, Codex), reply "Addressed" unprompted (see auto-memory `feedback-addressed-reply-bots`).
 - **Never use `git add -A` in business PRs.** Stage by name; no hitchhiking dotfiles or editor metadata.
 - **Slow, low-leverage, or business-disconnected output is a failure mode** regardless of technical quality.
 
