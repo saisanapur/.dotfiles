@@ -9,6 +9,7 @@ Personal dotfiles tailored for the Obsidian monorepo workflow.
 - `vscode/extensions.txt` — recommended extensions
 - `agents/claude.md` — Claude working notes
 - `agents/codex.md` — Codex working notes
+- `cursor/rules/` — Cursor **user-scope** always-on rules (→ `~/.cursor/rules/`)
 - `claude/user-settings.json` — Claude Code **user-scope** settings (→ `~/.claude/settings.json`)
 - `claude/obsidian-settings.local.json` — Claude Code **project-scope** local settings for the Obsidian repo (→ `/workspaces/obsidian/.claude/settings.local.json`)
 - `claude-plugins/` — personal Claude marketplace (`sai-personal`) hosting the `sai-wip` plugin; see [`claude-plugins/README.md`](claude-plugins/README.md)

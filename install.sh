@@ -66,6 +66,14 @@ fi
 # ---- Codex CLI: user-scope config (approval_policy, sandbox_mode, hooks toggle) ----
 link_with_backup "$DOTFILES_DIR/codex/config.toml" "$HOME/.codex/config.toml"
 
+# ---- Cursor: user-scope always-on rules ----
+mkdir -p "$HOME/.cursor/rules"
+for rule_path in "$DOTFILES_DIR"/cursor/rules/*.mdc; do
+  [ -f "$rule_path" ] || continue
+  rule_name="$(basename "$rule_path")"
+  link_with_backup "$rule_path" "$HOME/.cursor/rules/$rule_name"
+done
+
 # ---- Access Management KB: clone + per-skill symlinks ----
 # AM KB hosts shared team skills (run-test-plan, new-kb, sprint-prep, etc.) at
 # .claude/skills/. The run-test-plan skill in particular hardcodes the
