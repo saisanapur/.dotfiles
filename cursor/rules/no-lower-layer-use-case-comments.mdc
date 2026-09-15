@@ -1,0 +1,34 @@
+---
+description: Do not document upper-layer use cases on lower-layer APIs
+alwaysApply: true
+---
+
+# No upper-layer use cases on lower-layer APIs
+
+In any layered architecture, lower layers must not comment on specific callers or flows above them.
+
+Do **not** add JSDoc or inline comments that name upper-layer use cases, product flows, callers, or "pass X when …" scenarios. That couples the lower layer to today's consumers and goes stale when a new one appears.
+
+Applies to repositories, clients, shared libs, utilities, domain services consumed by application/workflow code — any dependency that sits below its callers.
+
+## Do not write
+
+```typescript
+/**
+ * Used by out-of-scope cleanup to resolve flags whose accounts left the
+ * evaluation set.
+ */
+listActiveKeysBySystemId(...)
+
+/**
+ * Pass `["ACTIVE"]` when an admin dismiss must win a race (e.g. out-of-scope
+ * cleanup).
+ */
+states?: readonly FlaggedAccountState[];
+```
+
+## Do instead
+
+- Name methods and parameters for what *this* layer does.
+- Put caller-specific rationale at the call site only when the constraint is non-obvious — or nowhere if the code already says it.
+- Keep lower-layer comments limited to mechanics that layer owns which the signature cannot express (e.g. storage quirks, protocol constraints).
