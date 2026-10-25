@@ -1,0 +1,19 @@
+codex/config.toml
+  s_abe7cdd4aa298c::t_bd5b10c9501e14 3-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.9",
+  "base_commit_sha": "a851de546d2f331a5ed0bf46075f9e974557f70d",
+  "prompts": {},
+  "sessions": {
+    "s_abe7cdd4aa298c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "s_abe7cdd4aa298c",
+        "model": "unknown"
+      },
+      "human_author": "Sai Sanapureddy <sai.sanapureddy@vanta.com>"
+    }
+  }
+}
