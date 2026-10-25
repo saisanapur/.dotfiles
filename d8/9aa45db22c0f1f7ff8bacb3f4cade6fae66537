@@ -1,0 +1,25 @@
+README.md
+  s_260b14d438b91b::t_012b05bbe69c42 12-13,30-40
+agents/codex.md
+  s_260b14d438b91b::t_d2ed14ecaa2c74 18
+codex/AGENTS.md
+  s_260b14d438b91b::t_d88666d69500a8 1-10
+install.sh
+  s_260b14d438b91b::t_d76688910db74e 66,68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.9",
+  "base_commit_sha": "d89aa45db22c0f1f7ff8bacb3f4cade6fae66537",
+  "prompts": {},
+  "sessions": {
+    "s_260b14d438b91b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "s_260b14d438b91b",
+        "model": "unknown"
+      },
+      "human_author": "Sai Sanapureddy <sai.sanapureddy@vanta.com>"
+    }
+  }
+}
