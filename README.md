@@ -9,6 +9,8 @@ Personal dotfiles tailored for the Obsidian monorepo workflow.
 - `vscode/extensions.txt` — recommended extensions
 - `agents/claude.md` — Claude working notes
 - `agents/codex.md` — Codex working notes
+- `codex/AGENTS.md` — global Codex instructions (→ `~/.codex/AGENTS.md`)
+- `codex/config.toml` — user-scope Codex configuration (→ `~/.codex/config.toml`)
 - `cursor/rules/` — Cursor **user-scope** always-on rules (→ `~/.cursor/rules/`)
 - `claude/user-settings.json` — Claude Code **user-scope** settings (→ `~/.claude/settings.json`)
 - `claude/obsidian-settings.local.json` — Claude Code **project-scope** local settings for the Obsidian repo (→ `/workspaces/obsidian/.claude/settings.local.json`)
@@ -24,6 +26,17 @@ source ~/.bashrc
 ```
 
 `install.sh` is safe to re-run: each symlink either already points at the right target (no-op), or the existing file is renamed to `<path>.pre-dotfiles-<timestamp>` before linking.
+
+## Codex setup
+
+`install.sh` links `codex/AGENTS.md` into `~/.codex/AGENTS.md`, so new Codex sessions
+load the instructions in every repository. Restart an existing session after
+installing or changing the instructions.
+
+The GitHub instructions require checking interactive Bash startup before reporting
+missing authentication. `bash -ic 'gh auth status'` can use the dev environment's
+existing `GH_TOKEN` when the agent's default shell cannot. No interactive GitHub
+login is needed when this check succeeds. Command approval policies still apply.
 
 ## Claude Code setup
 

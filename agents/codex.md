@@ -15,4 +15,4 @@
 - Never run `tsc` directly.
 - Keep turbo commands scoped (`-F`).
 - Workspace-level typecheck/lint only on explicit request.
-- Escalate immediately on missing tooling or blocked commands.
+- For GitHub authentication failures, follow the [global Codex instructions](../codex/AGENTS.md) before reporting a blocker. Report tooling and command-policy failures with their exact error.

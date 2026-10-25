@@ -63,8 +63,9 @@ if [ -d "/workspaces/obsidian" ]; then
   link_with_backup "$DOTFILES_DIR/claude/obsidian-settings.local.json" "/workspaces/obsidian/.claude/settings.local.json"
 fi
 
-# ---- Codex CLI: user-scope config (approval_policy, sandbox_mode, hooks toggle) ----
+# ---- Codex CLI: user-scope config and instructions ----
 link_with_backup "$DOTFILES_DIR/codex/config.toml" "$HOME/.codex/config.toml"
+link_with_backup "$DOTFILES_DIR/codex/AGENTS.md" "$HOME/.codex/AGENTS.md"
 
 # ---- Cursor: user-scope always-on rules ----
 mkdir -p "$HOME/.cursor/rules"
