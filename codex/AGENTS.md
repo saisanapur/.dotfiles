@@ -12,3 +12,7 @@
 ## User preference: code and PR quality
 
 Across all PRs, apply Robert C. Martin’s Clean Code and Clean Architecture principles pragmatically: intention-revealing names, small cohesive functions, straightforward control flow and guard clauses, clear responsibilities and package boundaries, and behavior-focused tests. Prefer simple existing abstractions; do not create layers or helpers merely to satisfy a pattern. Review readability before publication, including confusing ternaries, repeated null checks, and mixed levels of abstraction. Preserve repository conventions and explicit user-approved contracts.
+
+### Function readability and decomposition
+
+Keep functions readable as a clear sequence of intent at one level of abstraction. When a function mixes distinct responsibilities—such as validation, data loading, business decisions, and response mapping—decompose cohesive steps into well-named private methods or pure functions as appropriate. Keep orchestration concise and implementation details in the owning helper. Review the entire function for clarity; simplifying one conditional does not address an otherwise overloaded method. Preserve behavior and verify through public-contract tests rather than helper structure or call order. Avoid arbitrary line limits, trivial wrappers, and excessive fragmentation; extract only when it makes the code easier to understand.
