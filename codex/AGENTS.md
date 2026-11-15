@@ -16,3 +16,7 @@ Across all PRs, apply Robert C. Martin’s Clean Code and Clean Architecture pri
 ### Function readability and decomposition
 
 Keep functions readable as a clear sequence of intent at one level of abstraction. When a function mixes distinct responsibilities—such as validation, data loading, business decisions, and response mapping—decompose cohesive steps into well-named private methods or pure functions as appropriate. Keep orchestration concise and implementation details in the owning helper. Review the entire function for clarity; simplifying one conditional does not address an otherwise overloaded method. Preserve behavior and verify through public-contract tests rather than helper structure or call order. Avoid arbitrary line limits, trivial wrappers, and excessive fragmentation; extract only when it makes the code easier to understand.
+
+### Human-review readability
+
+Keep anything presented for human review concise and quick to scan. Focus on scope, important interfaces, responsibilities, decisions, and essential behavioral tests. Show public and private method signature stubs with short high-level pseudocode when they clarify the design; avoid full implementation listings. For pending decisions, present the options, their trade-offs, and a recommendation. Avoid redundant agent instructions and repeated constraints; link shared guidance and keep execution mechanics in the worker handoff. For ticket dispatch, settle interfaces and the high-level breakdown in the review packet before launching the worker.
