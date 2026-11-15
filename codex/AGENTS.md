@@ -20,3 +20,9 @@ Keep functions readable as a clear sequence of intent at one level of abstractio
 ### Human-review readability
 
 Keep anything presented for human review concise and quick to scan. Focus on scope, important interfaces, responsibilities, decisions, and essential behavioral tests. Show public and private method signature stubs with short high-level pseudocode when they clarify the design; avoid full implementation listings. For pending decisions, present the options, their trade-offs, and a recommendation. Avoid redundant agent instructions and repeated constraints; link shared guidance and keep execution mechanics in the worker handoff. For ticket dispatch, settle interfaces and the high-level breakdown in the review packet before launching the worker.
+
+### Comments and interface intent
+
+Do not put caller-specific product flows, eligibility rules, or usage instructions on lower-layer APIs. Describe only the contract and non-obvious mechanics owned by that layer. Do not repeat permission decorators or self-evident signatures in prose unless repository tooling requires it. Prefer no comment over a redundant one.
+
+Name filters explicitly and keep related selection criteria in a small typed `filters` object when appropriate; add only supported fields, not speculative operators or a generic framework. Make filtering and result construction clear at the call site. Give a cohesive result-building helper ownership of the complete collection when that keeps orchestration readable. Name tests in plain English for observable behavior; avoid phrases such as “contracted identity” or “adapts provenance.”
